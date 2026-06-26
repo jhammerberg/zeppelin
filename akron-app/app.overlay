@@ -1,0 +1,12 @@
+/ {
+    aliases {
+        led0 = &blink_led;
+    };
+
+    leds {
+        compatible = "gpio-leds";
+        blink_led: led_gpio {
+            gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+        };
+    };
+};
