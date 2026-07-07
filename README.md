@@ -14,7 +14,7 @@ uv tool install west
 ```
 3. Clone this repo
 ```bash
-west init -m [https://github.com/zephyrproject-rtos/example-application](https://github.com/jhammerberg/zeppelin.git) --mr main zeppelin-workspace
+west init -m https://github.com/jhammerberg/zeppelin.git --mr main zeppelin-workspace
 ```
 3. Clone the Zephyr RTOS
 ```bash
