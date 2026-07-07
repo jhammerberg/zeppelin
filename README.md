@@ -8,26 +8,23 @@ Also, Zephyr has like a bajillion Python dependencies, so to make the version co
 1. Install System Package Dependencies
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - [Zephyr System Package Dependencies](https://docs.zephyrproject.org/latest/develop/getting_started/index.html#install-dependencies)
-1. Clone this repo
+2. Install `west`:
 ```bash
-mkdir -p <projects-folder>/zeppelin-workspace/zeppelin
-git clone <this-url> <projects-folder>/zeppelin-workspace/zeppelin
-cd <projects-folder>/zeppelin-workspace/zeppelin
+uv tool install west
 ```
-2. Initialize the venv to get west
+3. Clone this repo
 ```bash
-uv sync
-<activate venv for your os>
+west init -m [https://github.com/zephyrproject-rtos/example-application](https://github.com/jhammerberg/zeppelin.git) --mr main zeppelin-workspace
 ```
 3. Clone the Zephyr RTOS
 ```bash
-west init -l .
+cd zeppelin-workspace
 west update
 ```
 > This will use about 7GB and take a long time!
 4. Install the Zephyr SDK
 ```bash
+uv pip install --system -r zephyr/scripts/requirements.txt
 west sdk install
 west zephyr-export
 ```
-> If you get python errors, try running `uv add -r ../zephyr/scripts/requirements.txt`
