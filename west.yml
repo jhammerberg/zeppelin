@@ -5,7 +5,7 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: main
+      revision: v4.3.0
       import: true
   self:
     path: zeppelin
