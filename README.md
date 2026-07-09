@@ -1,9 +1,7 @@
 # Zeppelin
 
 ## Setup
-This repo is setup as a T2 "star topology" meaning the apps are in the same repository as the manifest file. Zephyr project layouts are confusing, so this means you have to clone this repository inside of a larger "west workspace" directory where west will actually clone the zephyr-rtos and other modules/dependencies into because "west workspaces" should not be Git repositories according to the Zephyr docs.
-
-Also, Zephyr has like a bajillion Python dependencies, so to make the version control process easier this repository is also technically a uv project, just without any Python files so you can use uv sync to setup the venv and dependencies. While this is a bit silly, if you do want to make some Python scripts in the future for whatever, you'll already have a uv project setup!
+This repo is setup as a T2 "star topology" meaning the apps are in the same repository as the manifest file. This means you should not clone this repo directly; instead, you should use `west` to clone it into a "west workspace" directory.
 
 1. Install System Package Dependencies
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
