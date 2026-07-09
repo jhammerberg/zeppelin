@@ -41,4 +41,4 @@ jobs:
         shell: bash
         run: |
           west zephyr-export
-          west build -p auto akron-app
+          west build akron-app
