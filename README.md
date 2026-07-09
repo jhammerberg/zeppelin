@@ -24,7 +24,13 @@ west update
 > This will use about 7GB and take a long time!
 4. Install the Zephyr SDK
 ```bash
-uv pip install --system -r zephyr/scripts/requirements.txt
+uv tool install --with-requirements zephyr/scripts/requirements.txt west
 west sdk install
 west zephyr-export
 ```
+5. Open your code editor and build any project like this:
+```bash
+cd zeppelin
+west build akron-app
+```
+> Note that you will need to build at least once before your editor will pick up on the libraries and intellisense.
