@@ -52,7 +52,12 @@ console baud=default_baud:
 # Run the native_sim build with networking bridged
 [unix]
 run-sim: (build "akron-app" "true")
-    $(uv run west topdir)/../tools/net-tools/net-setup.sh
+    #!/usr/bin/env bash
+    set -euo pipefail
+    NET_SETUP="$(uv run west topdir)/tools/net-tools/net-setup.sh"
+    # Bring up the zeth TAP interface, then ensure it's torn down on exit.
+    sudo "$NET_SETUP" start
+    trap 'sudo "$NET_SETUP" stop' EXIT
     sudo ./build/zephyr/zephyr.exe
 
 # Build a target (pass --sim to build for native_sim)
