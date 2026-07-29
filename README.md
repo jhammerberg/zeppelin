@@ -40,7 +40,7 @@ just flash
 ```
 3. Open a serial terminal to target
 ```bash
-just console #(work in progress)
+just console # command alias is work in progress
 ```
 ### Build, Run, Test for simulation (POSIX only)
 > [!NOTE]
