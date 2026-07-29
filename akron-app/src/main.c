@@ -1,3 +1,4 @@
+#include <helium/time_sync.h>
 #include <helium/udp_server.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
@@ -38,6 +39,10 @@ int main(void) {
         gpio_pin_set_dt(&led, 1);  // set LED on to show error
         return -1;
     }
+
+    // Synchronize the system clock from a network time server, now that the
+    // network connection has been acquired.
+    time_sync_now();
 
     // Start the echo UDP server on its own thread
     udp_echo_server_start();
