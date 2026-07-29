@@ -15,18 +15,11 @@ void button_pressed_handler(const struct device *port, struct gpio_callback *cb,
 
 int main(void) {
     // Verify that the hardware driver is initialized and ready
-    if (!gpio_is_ready_dt(&led) || !gpio_is_ready_dt(&button)) {
-        return -ENODEV;
-    }
+    if (!gpio_is_ready_dt(&led) || !gpio_is_ready_dt(&button)) return -1;
 
     // Configure the pin as an output active pin
-    if (gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE) < 0) {
-        return -ENODEV;
-    }
-
-    if (gpio_pin_configure_dt(&button, GPIO_INPUT) < 0) {
-        return -ENODEV;
-    }
+    if (gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE) < 0) return -1;
+    if (gpio_pin_configure_dt(&button, GPIO_INPUT) < 0) return -1;
 
     // Configure the button interrupt
     gpio_pin_interrupt_configure_dt(&button, GPIO_INT_EDGE_TO_ACTIVE);

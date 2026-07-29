@@ -1,16 +1,18 @@
-# Copyright (c) 2024 Basalte bv
-# Copyright (c) 2026 Zeppelin project
-#
-# SPDX-License-Identifier: Apache-2.0
-
 """
-Override of Zephyr's `west packages` command that adds `uv` support.
+Zephyr's `west packages` command with added `uv` support, exposed as the
+`west packages-uv` command.
 
 This is based on the upstream PR
 https://github.com/zephyrproject-rtos/zephyr/pull/94432 which was never
 merged. Instead of vendoring the whole command, we subclass the upstream
 ``Packages`` class and only add the ``uv`` sub-command, so we keep tracking
 upstream fixes to the rest of the command.
+
+We register this under the distinct name ``packages-uv`` rather than
+shadowing Zephyr's ``packages`` command, to avoid the "already defined as
+extension command" warning west emits for duplicate command names.
+
+Credit: Claude Opus 4.8
 """
 
 import argparse
@@ -57,6 +59,27 @@ from zephyr_ext_common import ZEPHYR_BASE  # noqa: E402
 
 
 class Packages(_ZephyrPackages):
+    def __init__(self):
+        # Register under a distinct name (``packages-uv``) instead of the
+        # upstream ``packages`` name. West rebuilds a fresh parser at
+        # invocation time and registers the command's subparser using
+        # ``self.name`` (see west.app.main.run_extension /
+        # WestCommand.add_parser). If we inherited the upstream ``packages``
+        # name, west would look up the invoked ``packages-uv`` command name
+        # against a subparser registered as ``packages`` and fail with
+        # "invalid choice: 'packages-uv'". Setting the name here keeps the
+        # command name, its stub parser, and its real parser consistent.
+        #
+        # We intentionally do NOT call the parent __init__ (which hardcodes
+        # the "packages" name); we call the grandparent WestCommand.__init__
+        # directly with our own name.
+        super(_ZephyrPackages, self).__init__(
+            "packages-uv",
+            "manage packages for Zephyr (with uv support)",
+            "List and Install packages for Zephyr and modules, with uv support",
+            accepts_unknown_args=True,
+        )
+
     def do_add_parser(self, parser_adder):
         # Let upstream build the base parser (including the `pip` sub-parser and
         # the shared `-m/--module` option). We then reach into its subparsers
@@ -77,7 +100,7 @@ class Packages(_ZephyrPackages):
                 """
             Manage uv packages:
 
-                Run 'west packages uv' to print all requirement files needed by
+                Run 'west packages-uv uv' to print all requirement files needed by
                 Zephyr and modules.
 
                 The output is compatible with the requirements file format itself.
@@ -91,7 +114,7 @@ class Packages(_ZephyrPackages):
             help="Install uv requirements instead of listing them. "
             "A single 'uv pip install' command is built and executed. "
             "Additional uv arguments can be passed after a -- separator "
-            "from the original 'west packages uv --install' command. For example pass "
+            "from the original 'west packages-uv uv --install' command. For example pass "
             "'--dry-run' to uv not to actually install anything, but print what would be.",
         )
 
@@ -99,7 +122,7 @@ class Packages(_ZephyrPackages):
             "--ignore-venv-check",
             action="store_true",
             help="Ignore the virtual environment check. "
-            "This is useful when running 'west packages uv --install' "
+            "This is useful when running 'west packages-uv uv --install' "
             "in a CI environment where the virtual environment is not set up.",
         )
 
@@ -168,6 +191,6 @@ class Packages(_ZephyrPackages):
             return
 
         if len(manager_args) > 0:
-            self.die(f'west packages uv does not support unknown arguments: "{manager_args}"')
+            self.die(f'west packages-uv uv does not support unknown arguments: "{manager_args}"')
 
         self.inf("\n".join([f"-r {r}" for r in requirements]))
