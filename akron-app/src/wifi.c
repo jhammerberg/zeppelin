@@ -9,7 +9,8 @@
 LOG_MODULE_REGISTER(wifi, LOG_LEVEL_INF);
 
 /* Events we listen for to determine connection outcome */
-#define WIFI_MGMT_EVENTS (NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
+#define WIFI_MGMT_EVENTS \
+    (NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
 
 /* Signalled by the event handler once a connect result is available */
 static struct k_sem wifi_connected_sem;
@@ -20,8 +21,8 @@ static struct net_mgmt_event_callback wifi_mgmt_cb;
 /* Result of the most recent connection attempt (0 = success) */
 static int wifi_connect_status = -1;
 
-static void wifi_mgmt_event_handler(struct net_mgmt_event_callback* cb, uint32_t mgmt_event,
-                                    struct net_if* iface) {
+static void wifi_mgmt_event_handler(struct net_mgmt_event_callback* cb,
+                                    uint32_t mgmt_event, struct net_if* iface) {
     ARG_UNUSED(iface);
 
     switch (mgmt_event) {
@@ -70,22 +71,23 @@ int wifi_connect(const char* ssid, const char* psk, const int timeout) {
     wifi_connect_status = -1;
 
     /* Register for the Wi-Fi management events */
-    net_mgmt_init_event_callback(&wifi_mgmt_cb, (void*)wifi_mgmt_event_handler, WIFI_MGMT_EVENTS);
+    net_mgmt_init_event_callback(&wifi_mgmt_cb, (void*)wifi_mgmt_event_handler,
+                                 WIFI_MGMT_EVENTS);
     net_mgmt_add_event_callback(&wifi_mgmt_cb);
 
     /* Build the connection request parameters */
     struct wifi_connect_req_params params = {0};
 
-    params.ssid        = (const uint8_t*)ssid;
+    params.ssid = (const uint8_t*)ssid;
     params.ssid_length = strlen(ssid);
-    params.channel     = WIFI_CHANNEL_ANY;
-    params.band        = WIFI_FREQ_BAND_UNKNOWN;
-    params.mfp         = WIFI_MFP_OPTIONAL;
+    params.channel = WIFI_CHANNEL_ANY;
+    params.band = WIFI_FREQ_BAND_UNKNOWN;
+    params.mfp = WIFI_MFP_OPTIONAL;
 
     if (psk != NULL && strlen(psk) > 0) {
-        params.psk        = (const uint8_t*)psk;
+        params.psk = (const uint8_t*)psk;
         params.psk_length = strlen(psk);
-        params.security   = WIFI_SECURITY_TYPE_PSK;
+        params.security = WIFI_SECURITY_TYPE_PSK;
     } else {
         params.security = WIFI_SECURITY_TYPE_NONE;
     }

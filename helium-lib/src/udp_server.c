@@ -43,8 +43,7 @@ static void udp_echo_loop(int sock) {
             continue;
         }
 
-        ssize_t sent =
-            zsock_sendto(sock, buf, received, 0, &src_addr, src_addr_len);
+        ssize_t sent = zsock_sendto(sock, buf, received, 0, &src_addr, src_addr_len);
         if (sent < 0) {
             printk("UDP sendto error: %d\n", errno);
             continue;
@@ -80,7 +79,6 @@ static void udp_echo_thread_entry(void* arg1, void* arg2, void* arg3) {
 // Spawn the dedicated UDP echo server thread
 k_tid_t udp_echo_server_start(void) {
     return k_thread_create(&udp_echo_thread, udp_echo_stack,
-                           K_THREAD_STACK_SIZEOF(udp_echo_stack),
-                           udp_echo_thread_entry, NULL, NULL, NULL,
-                           UDP_ECHO_THREAD_PRIORITY, 0, K_NO_WAIT);
+                           K_THREAD_STACK_SIZEOF(udp_echo_stack), udp_echo_thread_entry,
+                           NULL, NULL, NULL, UDP_ECHO_THREAD_PRIORITY, 0, K_NO_WAIT);
 }
