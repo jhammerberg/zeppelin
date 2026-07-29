@@ -5,6 +5,11 @@
 west *ARGS:
     uv run west {{ARGS}}
 
+# clang-format all source files
+# uses clang-format from uv venv and finds files using git which should be guarenteed to exist
+format:
+    git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format -i -style=file || true
+
 # First time setup
 setup:
     @echo "{{YELLOW}}{{BOLD}}Running first time setup...{{NORMAL}}"

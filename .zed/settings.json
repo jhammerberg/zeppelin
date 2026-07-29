@@ -1,0 +1,11 @@
+{
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "arguments": [
+          "--query-driver=../zephyr-sdk-*/**/bin/*,**/bin/*-gcc*,**/bin/*-g++*,**/bin/*gcc*,**/bin/*g++*"
+        ]
+      }
+    }
+  }
+}

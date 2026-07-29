@@ -1,5 +1,5 @@
-#include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/kernel.h>
 
 #define SLEEP_TIME_MS 1000
 
@@ -9,7 +9,8 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(DT_ALIAS(button0), gp
 
 // Button callback data and handler
 static struct gpio_callback button_cb_data;
-void button_pressed_handler(const struct device *port, struct gpio_callback *cb, gpio_port_pins_t pins) {
+void button_pressed_handler(const struct device* port, struct gpio_callback* cb,
+                            gpio_port_pins_t pins) {
     printk("Button Pressed!\n");
 }
 
