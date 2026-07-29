@@ -3,6 +3,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(BOARD esp32_devkitc/esp32/procpu) # default board
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(arkon-app)
+project(akron-app)
 
 target_sources(app PRIVATE src/main.c)

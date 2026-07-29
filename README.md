@@ -60,6 +60,7 @@ In general, run `just` (no arguments) to get a list of recipes that can be ran:
 ```bash
 Available recipes:
     build [OPTIONS] target    # Build a target (pass --sim to build for native_sim)
+    check                     # clang-format check of all source files (dryrun)
     console baud=default_baud # Open a serial console (default baud 115200)
     flash                     # Flash the connected board
     format                    # clang-format all source files

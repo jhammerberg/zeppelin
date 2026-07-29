@@ -1,5 +1,6 @@
 # Zeppelin project automation
 # Mostly exists to not have to activate the python venv by wrapping `uv run`
+set ignore-comments := true
 
 [private] # private so it doesn't show itself in the list
 default:
@@ -9,9 +10,10 @@ default:
 west *ARGS:
     uv run west {{ARGS}}
 
-# uses clang-format from uv venv and finds files using git which should be guarenteed to exist
+# clang-format check of all source files (dryrun)
 check:
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format --dry-run --Werror -style=file || true
+    # use clang-format from uv venv and finds files using git which should be guarenteed to exist
 
 # clang-format all source files
 format:
@@ -39,13 +41,13 @@ update:
 flash:
     uv run west flash
 
-# TODO: make into generic serial monitor with something like minicom
 default_baud := "115200"
 
 # Open a serial console (default baud 115200)
 console baud=default_baud:
     @echo "{{BLUE}}Starting serial console with baud rate: {{GREEN}}{{baud}}{{NORMAL}}"
     uv run west espressif monitor
+    # TODO: make into generic serial monitor with something like minicom
 
 # Build a target (pass --sim to build for native_sim)
 [arg("sim", long, value="true")]
