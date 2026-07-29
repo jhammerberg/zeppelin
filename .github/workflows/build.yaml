@@ -44,6 +44,7 @@ jobs:
             west sdk install
           fi
           west zephyr-export
+          west blobs fetch hal_espressif
 
       - name: Build akron-app
         working-directory: zeppelin
