@@ -39,8 +39,6 @@ jobs:
       - name: Setup Zeppelin
         working-directory: zeppelin
         shell: bash
-        with:
-          ccache-cache-key: ${{ matrix.os }}
         run: |
           west sdk install
           west zephyr-export
