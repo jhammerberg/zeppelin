@@ -1,12 +1,19 @@
 # Zeppelin project automation
 # Mostly exists to not have to activate the python venv by wrapping `uv run`
 
+[private] # private so it doesn't show itself in the list
+default:
+    @just --list
+
 # Generic west wrapper
 west *ARGS:
     uv run west {{ARGS}}
 
-# clang-format all source files
 # uses clang-format from uv venv and finds files using git which should be guarenteed to exist
+check:
+    git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format --dry-run --Werror -style=file || true
+
+# clang-format all source files
 format:
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format -i -style=file || true
 
@@ -18,7 +25,7 @@ setup:
     uv pip install pip west
     just update
 
-# Auto-update
+# Auto-update west and Zephyr dependencies
 update:
     @echo "{{BLUE}}Checking for updates...{{NORMAL}}"
     git fetch
@@ -28,15 +35,19 @@ update:
     uv run west zephyr-export
     uv run west blobs fetch hal_espressif
 
+# Flash the connected board
 flash:
     uv run west flash
 
 # TODO: make into generic serial monitor with something like minicom
 default_baud := "115200"
+
+# Open a serial console (default baud 115200)
 console baud=default_baud:
     @echo "{{BLUE}}Starting serial console with baud rate: {{GREEN}}{{baud}}{{NORMAL}}"
     uv run west espressif monitor
 
+# Build a target (pass --sim to build for native_sim)
 [arg("sim", long, value="true")]
 build target sim="false":
     @echo "{{BLUE}}Building{{NORMAL}} {{target}}..."

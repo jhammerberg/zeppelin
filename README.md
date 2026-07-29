@@ -42,8 +42,8 @@ just flash
 ```bash
 just console # command alias is work in progress
 ```
-### Build, Run, Test for simulation (POSIX only)
-> [!NOTE]
+### Build, Run, Test for Simulation (POSIX only)
+> [!IMPORTANT]
 > This can only work on a POSIX system (Linux or MacOS), if using Windows you must use WSL!
 1. Build app, but with `--sim` flag
 ```bash
@@ -54,6 +54,23 @@ just build akron-app --sim
 ./build/zephyr/zephyr.exe
 ```
 As the simulation capabilities of this project expand there may be more requirements and libraries but for now this is it!
+
+### Useful Commands & Workflow
+In general, run `just` (no arguments) to get a list of recipes that can be ran:
+```bash
+Available recipes:
+    build [OPTIONS] target    # Build a target (pass --sim to build for native_sim)
+    console baud=default_baud # Open a serial console (default baud 115200)
+    flash                     # Flash the connected board
+    format                    # clang-format all source files
+    setup                     # First time setup
+    update                    # Auto-update west and Zephyr dependencies
+    west *ARGS                # Generic west wrapper
+```
+Most of these are straightforward but some to take note of are:
+- `just format`: Runs `clang-format` over all source files. If making a pull request, all source files should meet this spec.
+- `just update`: Ensures that depencies are installed and update for Zephyr, modules, west packages, cmake variables, and blobs.
+- `just west <args>`: A generic wrapper for west commands. Useful if you don't want to activate the venv to run a command.
 
 ## Troubleshooting
 
