@@ -8,6 +8,8 @@
 
 LOG_MODULE_REGISTER(wifi, LOG_LEVEL_INF);
 
+#if defined(CONFIG_WIFI)
+
 /* Events we listen for to determine connection outcome */
 #define WIFI_MGMT_EVENTS \
     (NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
@@ -53,19 +55,8 @@ static void wifi_mgmt_event_handler(struct net_mgmt_event_callback* cb,
     }
 }
 
-int wifi_connect(const char* ssid, const char* psk, const int timeout) {
-    if (ssid == NULL) {
-        LOG_ERR("SSID must not be NULL");
-        return -EINVAL;
-    }
-
-    /* Grab the default network interface (the Wi-Fi device) */
-    struct net_if* iface = net_if_get_first_wifi();
-    if (iface == NULL) {
-        LOG_ERR("No Wi-Fi interface available");
-        return -ENODEV;
-    }
-
+static int wifi_do_connect(struct net_if* iface, const char* ssid, const char* psk,
+                           const int timeout) {
     /* Prepare the semaphore used to wait for the connection result */
     k_sem_init(&wifi_connected_sem, 0, 1);
     wifi_connect_status = -1;
@@ -112,4 +103,46 @@ int wifi_connect(const char* ssid, const char* psk, const int timeout) {
     }
 
     return wifi_connect_status;
+}
+
+#endif /* CONFIG_WIFI */
+
+int wifi_connect(const char* ssid, const char* psk, const int timeout) {
+    if (ssid == NULL) {
+        LOG_ERR("SSID must not be NULL");
+        return -EINVAL;
+    }
+
+#if defined(CONFIG_WIFI)
+    /* Prefer a real Wi-Fi interface when the platform has one. */
+    struct net_if* iface = net_if_get_first_wifi();
+    if (iface != NULL) {
+        return wifi_do_connect(iface, ssid, psk, timeout);
+    }
+
+    LOG_WRN("No Wi-Fi interface; falling back to default network interface");
+#else
+    ARG_UNUSED(psk);
+    ARG_UNUSED(timeout);
+    LOG_INF("Wi-Fi not enabled; using default network interface");
+#endif
+
+    /*
+     * No Wi-Fi available (e.g. native_sim). Fall back to whatever network
+     * interface the platform provides (typically emulated Ethernet). It is
+     * brought up by the net config subsystem, so there is no association
+     * step to perform here.
+     */
+    struct net_if* iface = net_if_get_default();
+    if (iface == NULL) {
+        LOG_ERR("No network interface available");
+        return -ENODEV;
+    }
+
+    if (!net_if_is_up(iface)) {
+        LOG_WRN("Default network interface is not up");
+    }
+
+    LOG_INF("Using default network interface (no Wi-Fi association)");
+    return 0;
 }

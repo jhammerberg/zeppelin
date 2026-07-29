@@ -49,6 +49,12 @@ console baud=default_baud:
     uv run west espressif monitor
     # TODO: make into generic serial monitor with something like minicom
 
+# Run the native_sim build with networking bridged
+[unix]
+run-sim: (build "akron-app" "true")
+    $(uv run west topdir)/../tools/net-tools/net-setup.sh
+    sudo ./build/zephyr/zephyr.exe
+
 # Build a target (pass --sim to build for native_sim)
 [arg("sim", long, value="true")]
 build target sim="false":
