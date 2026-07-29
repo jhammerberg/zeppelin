@@ -12,7 +12,7 @@ uvx west init -m https://github.com/jhammerberg/zeppelin.git --mr main zeppelin-
 ```
 3. Make west venv
 ```bash
-cd zeppelin-workspace
+cd zeppelin-workspace/zeppelin
 uv venv --python 3.12
 <activate venv for your shell>
 uv pip install pip west
