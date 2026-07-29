@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test build akron-app
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-14, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: zeppelin
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Initialize Zeppelin Workspace
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: zeppelin
+          toolchains: arm-zephyr-eabi:riscv64-zephyr-elf:xtensa-espressif_esp32_zephyr-elf
+          ccache-cache-key: ${{ matrix.os }}
+
+      - name: Setup Zeppelin
+        working-directory: zeppelin
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" != "Windows" ]; then
+            west sdk install
+          fi
+          west zephyr-export
+
+      - name: Build akron-app
+        working-directory: zeppelin
+        shell: bash
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+        run: |
+          west build akron-app

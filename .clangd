@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -Wall
+  Remove:
+    - -fno-printf-return-value
+    - -fno-reorder-functions
+    - -fstrict-volatile-bitfields
