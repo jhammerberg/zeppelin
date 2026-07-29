@@ -44,6 +44,6 @@ west build akron-app
 ## Troubleshooting
 If `west flash` does not work and you are on Linux, you may need to add your user to the `dialout` group:
 ```bash
-sudo usermod -a -G uucp $USER
+sudo usermod -a -G dialout $USER
 ```
 And then logout entirely (or reboot) and log back in.
