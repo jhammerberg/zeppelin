@@ -1,0 +1,11 @@
+# Zeppelin project west extension commands.
+#
+# This overrides the upstream Zephyr `packages` command to add `uv` support.
+# Because the `zeppelin` (self) project is listed before the imported `zephyr`
+# project in west.yml, this definition takes precedence over Zephyr's.
+west-commands:
+  - file: scripts/west_commands/packages_uv.py
+    commands:
+      - name: packages
+        class: Packages
+        help: manage packages for Zephyr (with uv support)

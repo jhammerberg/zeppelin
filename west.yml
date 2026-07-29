@@ -1,11 +1,20 @@
 manifest:
+  self:
+    path: zeppelin
+    west-commands: scripts/west-commands.yml
+
   remotes:
     - name: zephyrproject-rtos
       url-base: https://github.com/zephyrproject-rtos
+
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
       revision: v4.3.0
-      import: true
-  self:
-    path: zeppelin
+      import:
+        # Try to keep this to only modules that are actually used
+        # by the project to reduce the size of the workspace directory
+        name-allowlist:
+          - cmsis_6
+          - hal_espressif
+          - hal_stm32

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build app and tests
+    name: Test build akron-app
     strategy:
       fail-fast: false
       matrix:
@@ -24,10 +24,8 @@ jobs:
           path: zeppelin
           persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
@@ -36,9 +34,14 @@ jobs:
           toolchains: arm-zephyr-eabi
           ccache-cache-key: ${{ matrix.os }}
 
-      - name: Build firmware
+      - name: Install west packages with uv
         working-directory: zeppelin
         shell: bash
         run: |
-          west zephyr-export
+          west packages uv --install
+
+      - name: Build akron-app
+        working-directory: zeppelin
+        shell: bash
+        run: |
           west build akron-app
