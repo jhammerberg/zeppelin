@@ -21,12 +21,15 @@ uv pip install pip west
 ```bash
 west update
 ```
-> NOTE: This may take a while and use quite a bit of spaces
+
+> [!NOTE]
+> This may take a while and use quite a bit of space!
 5. Install all west packages
 ```bash
 west packages uv --install
 ```
-> NOTE: This is an override of the native `west packages` command to support `uv`, you can find the implementation in `scripts/west_commands/packages_uv.py`
+> [!NOTE]
+> This is an override of the native `west packages` command to support `uv`, you can find the implementation in `scripts/west_commands/packages_uv.py`
 6. Install the Zephyr SDK
 ```bash
 west sdk install
@@ -36,4 +39,5 @@ west zephyr-export
 ```bash
 west build akron-app
 ```
-> Note that you will need to build at least once before your editor will pick up on the libraries and intellisense.
+> [!NOTE]
+> You will need to build at least once before your editor will pick up on the libraries and intellisense.
