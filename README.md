@@ -60,30 +60,27 @@ As the simulation capabilities of this project expand there may be more requirem
 <details>
     <summary>Flashing on Linux permission fails</summary>
 
-    ### Flashing on Linux permission fails
-    If `west flash` does not work and you are on Linux, you may need to add your user to the `dialout` group:
-    ```bash
-    sudo usermod -a -G dialout $USER
-    ```
-    And then logout entirely (or reboot) and log back in.
+If `west flash` does not work and you are on Linux, you may need to add your user to the `dialout` group:
+```bash
+sudo usermod -a -G dialout $USER
+```
+And then logout entirely (or reboot) and log back in.
 </details>
 
 <details>
     <summary>Build failing after pulling new changes</summary>
 
-    ### Build failing after pulling new changes
-    If your builds are suddenly failing and they weren't before after pulling new changes, it's possible a new dependency was added to the project which has not yet been installed locally. It's a good idea to run the update command after every pull in case there are changes:
-    ```bash
-    just update
-    ```
-    It's possible that dependencies will be added to the project but not to the justfile, in which case shame on me! But I will try to keep it up-to-date.
+If your builds are suddenly failing and they weren't before after pulling new changes, it's possible a new dependency was added to the project which has not yet been installed locally. It's a good idea to run the update command after every pull in case there are changes:
+```bash
+just update
+```
+It's possible that dependencies will be added to the project but not to the justfile, in which case shame on me! But I will try to keep it up-to-date.
 </details>
 
 <details>
     <summary>The setup fails because there is "no workspace"</summary>
 
-    ### The setup fails because there is "no workspace"
-    This might happen if you don't follow step 2 of the guide exactly. If you try to use `git clone` it will not work because this repository needs to exist in another directory called your "workspace" and even if you make a dedicated directory and then try to use `git clone`, it will still fail because west needs to find a `.west` directory (which is auto-generated when using `west init`). 
-    
-    So TLDR: just use the exact `uvx west init ...` command from above.
+This might happen if you don't follow step 2 of the guide exactly. If you try to use `git clone` it will not work because this repository needs to exist in another directory called your "workspace" and even if you make a dedicated directory and then try to use `git clone`, it will still fail because west needs to find a `.west` directory (which is auto-generated when using `west init`). 
+
+So TLDR: just use the exact `uvx west init ...` command from above.
 </details>
