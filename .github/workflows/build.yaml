@@ -40,7 +40,6 @@ jobs:
         working-directory: zeppelin
         shell: bash
         run: |
-          west sdk install
           west zephyr-export
 
       - name: Build akron-app
