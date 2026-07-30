@@ -84,4 +84,4 @@ run-sim: (build "akron-app" "true")
 [arg("sim", long, value="true")]
 build target sim="false":
     @echo "{{BLUE}}Building{{NORMAL}} {{target}}..."
-    uv run west build {{target}} -p auto {{ if sim == "true" { "-b native_sim" } else { "" } }}
+    uv run west build {{target}} -p auto -b {{ if sim == "true" { "native_sim" } else { "esp32_devkitc/esp32/procpu" } }}

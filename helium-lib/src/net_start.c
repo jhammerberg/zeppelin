@@ -1,6 +1,5 @@
 #include "helium/net_start.h"
 
-#include <errno.h>
 #include <string.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
