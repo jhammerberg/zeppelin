@@ -1,10 +1,9 @@
 #include <helium/time_sync.h>
-
-#include <errno.h>
 #include <time.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/sntp.h>
+#include <zephyr/sys/clock.h>
 
 LOG_MODULE_REGISTER(time_sync, LOG_LEVEL_INF);
 
@@ -38,13 +37,14 @@ int time_sync_now(void) {
         .tv_nsec = 0,
     };
 
-    ret = clock_settime(CLOCK_REALTIME, &tspec);
+    ret = sys_clock_settime(SYS_CLOCK_REALTIME, &tspec);
     if (ret < 0) {
-        LOG_ERR("Failed to set system clock: %d", -errno);
-        return -errno;
+        LOG_ERR("Failed to set system clock: %d", ret);
+        return ret;
     }
 
-    LOG_INF("System clock synchronized (epoch %llu)", (unsigned long long)sntp_time.seconds);
+    LOG_INF("System clock synchronized (epoch %llu)",
+            (unsigned long long)sntp_time.seconds);
     return 0;
 }
 
