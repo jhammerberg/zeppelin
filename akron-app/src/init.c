@@ -4,6 +4,14 @@
 
 #include "init.h"
 
+#include <helium/time.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/net/conn_mgr_connectivity.h>
+#include <zephyr/net/net_event.h>
+#include <zephyr/net/net_if.h>
+
 #define NETWORK_TIMEOUT_VAL \
     30000  // Network timeout in milliseconds, for no timeout do K_FOREVER
 

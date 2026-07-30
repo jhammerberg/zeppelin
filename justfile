@@ -26,7 +26,7 @@ setup:
     @echo "{{YELLOW}}{{BOLD}}Running first time setup...{{NORMAL}}"
     # NOTE: Python 3.13+ will break setup because of changes to filesystem paths
     uv venv --python 3.12 --clear
-    uv pip install pip west
+    uv pip install pip west jsonschema
     just update
 
 # Auto-update west and Zephyr dependencies
