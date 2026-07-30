@@ -54,10 +54,30 @@ console baud=default_baud:
 run-sim: (build "akron-app" "true")
     #!/usr/bin/env bash
     set -euo pipefail
-    NET_SETUP="$(uv run west topdir)/tools/net-tools/net-setup.sh"
-    # Bring up the zeth TAP interface, then ensure it's torn down on exit.
-    sudo "$NET_SETUP" start
-    trap 'sudo "$NET_SETUP" stop' EXIT
+    PROJECT_DIR="$PWD"
+    NET_TOOLS_DIR="$(uv run west topdir)/tools/net-tools"
+    SIM_NETWORK="192.0.2.0/24"
+    FIREWALLD_ACTIVE=0
+
+    cleanup() {
+        set +e
+        if [[ "$FIREWALLD_ACTIVE" == 1 ]]; then
+            sudo firewall-cmd --zone=trusted --remove-source="$SIM_NETWORK"
+        fi
+        cd "$NET_TOOLS_DIR"
+        sudo ./net-setup.sh --config nat.conf stop
+    }
+
+    cd "$NET_TOOLS_DIR"
+    sudo ./net-setup.sh --config nat.conf start
+    trap cleanup EXIT
+
+    if command -v firewall-cmd >/dev/null && sudo firewall-cmd --state >/dev/null 2>&1; then
+        sudo firewall-cmd --zone=trusted --add-source="$SIM_NETWORK"
+        FIREWALLD_ACTIVE=1
+    fi
+
+    cd "$PROJECT_DIR"
     sudo ./build/zephyr/zephyr.exe
 
 # Build a target (pass --sim to build for native_sim)

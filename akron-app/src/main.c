@@ -1,15 +1,40 @@
+#include <helium/net_start.h>
 #include <helium/time_sync.h>
 #include <helium/udp_server.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
 
-#include "wifi.h"
-
 #define SLEEP_TIME_MS 1000
 
+#if defined(CONFIG_WIFI) && defined(CONFIG_NET_L2_WIFI_MGMT)
 #define WIFI_SSID "something"
 #define WIFI_PSK "something"
 #define WIFI_TIMEOUT 60000  // milliseconds
+
+static const struct wifi_config wifi = {
+    .ssid = WIFI_SSID,
+    .password = WIFI_PSK,
+    .timeout = WIFI_TIMEOUT,
+};
+
+static const struct network_config network = {
+    .prefer_dhcp = 1,
+    .wifi = &wifi,
+    .static_ip = NULL,
+};
+#else
+static const struct static_ip_config static_ip = {
+    .ip = CONFIG_NET_CONFIG_MY_IPV4_ADDR,
+    .netmask = CONFIG_NET_CONFIG_MY_IPV4_NETMASK,
+    .gateway = CONFIG_NET_CONFIG_MY_IPV4_GW,
+};
+
+static const struct network_config network = {
+    .prefer_dhcp = 0,
+    .wifi = NULL,
+    .static_ip = &static_ip,
+};
+#endif
 
 // Pull the led0 specification from the devicetree overlay
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
@@ -35,7 +60,7 @@ int main(void) {
     gpio_init_callback(&button_cb_data, button_pressed_handler, BIT(button.pin));
     gpio_add_callback_dt(&button, &button_cb_data);
 
-    if (wifi_connect(WIFI_SSID, WIFI_PSK, WIFI_TIMEOUT) < 0) {
+    if (net_start(&network) < 0) {
         gpio_pin_set_dt(&led, 1);  // set LED on to show error
         return -1;
     }

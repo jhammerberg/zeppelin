@@ -2,7 +2,7 @@
 # Built as a Zephyr module library (see zephyr/module.yml).
 
 zephyr_library()
-zephyr_library_sources(src/udp_server.c)
-zephyr_library_sources(src/time_sync.c)
+file(GLOB app_sources src/*.c)
+zephyr_library_sources(${app_sources})
 
 zephyr_include_directories(include)
