@@ -51,9 +51,7 @@ console baud=default_baud:
     uv run west espressif monitor
     # TODO: make into generic serial monitor with something like minicom
 
-# Run the native_sim build. Uses NSOS (see boards/native_sim.conf), so the
-# binary talks to the network through the host's own sockets: no root, TAP
-# interface, or dnsmasq setup needed.
+# Run (and build if needed) the native_sim build
 [unix]
 run-sim: (build "akron-app" "true")
     @echo "{{BLUE}}Running native_sim...{{NORMAL}}"

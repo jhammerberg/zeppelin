@@ -51,7 +51,7 @@ just build akron-app --sim
 ```
 2. Run app
 ```bash
-./build/zephyr/zephyr.exe
+just run-sim
 ```
 As the simulation capabilities of this project expand there may be more requirements and libraries but for now this is it!
 
@@ -64,6 +64,7 @@ Available recipes:
     console baud=default_baud # Open a serial console (default baud 115200)
     flash                     # Flash the connected board
     format                    # clang-format all source files
+    run-sim                   # Run (and build if needed) the native_sim build
     setup                     # First time setup
     update                    # Auto-update west and Zephyr dependencies
     west *ARGS                # Generic west wrapper
