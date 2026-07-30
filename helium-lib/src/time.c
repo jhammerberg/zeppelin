@@ -1,4 +1,4 @@
-#include <helium/time_sync.h>
+#include <helium/time.h>
 #include <time.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>

@@ -12,11 +12,13 @@ west *ARGS:
 
 # clang-format check of all source files (dryrun)
 check:
+    git add .
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format --dry-run --Werror -style=file || true
     # use clang-format from uv venv and finds files using git which should be guarenteed to exist
 
 # clang-format all source files
 format:
+    git add .
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format -i -style=file || true
 
 # First time setup
@@ -49,36 +51,13 @@ console baud=default_baud:
     uv run west espressif monitor
     # TODO: make into generic serial monitor with something like minicom
 
-# Run the native_sim build with networking bridged
+# Run the native_sim build. Uses NSOS (see boards/native_sim.conf), so the
+# binary talks to the network through the host's own sockets: no root, TAP
+# interface, or dnsmasq setup needed.
 [unix]
 run-sim: (build "akron-app" "true")
-    #!/usr/bin/env bash
-    set -euo pipefail
-    PROJECT_DIR="$PWD"
-    NET_TOOLS_DIR="$(uv run west topdir)/tools/net-tools"
-    SIM_NETWORK="192.0.2.0/24"
-    FIREWALLD_ACTIVE=0
-
-    cleanup() {
-        set +e
-        if [[ "$FIREWALLD_ACTIVE" == 1 ]]; then
-            sudo firewall-cmd --zone=trusted --remove-source="$SIM_NETWORK"
-        fi
-        cd "$NET_TOOLS_DIR"
-        sudo ./net-setup.sh --config nat.conf stop
-    }
-
-    cd "$NET_TOOLS_DIR"
-    sudo ./net-setup.sh --config nat.conf start
-    trap cleanup EXIT
-
-    if command -v firewall-cmd >/dev/null && sudo firewall-cmd --state >/dev/null 2>&1; then
-        sudo firewall-cmd --zone=trusted --add-source="$SIM_NETWORK"
-        FIREWALLD_ACTIVE=1
-    fi
-
-    cd "$PROJECT_DIR"
-    sudo ./build/zephyr/zephyr.exe
+    @echo "{{BLUE}}Running native_sim...{{NORMAL}}"
+    ./build/zephyr/zephyr.exe
 
 # Build a target (pass --sim to build for native_sim)
 [arg("sim", long, value="true")]
