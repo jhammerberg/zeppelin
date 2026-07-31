@@ -17,9 +17,10 @@
 
 LOG_MODULE_REGISTER(init, LOG_LEVEL_INF);
 
-// Semaphores to synchronize connection and disconnection events
+// Semaphores and callback storage must outlive the registered network events.
 K_SEM_DEFINE(network_connected, 0, 1);
 K_SEM_DEFINE(network_disconnected, 0, 1);
+static struct net_mgmt_event_callback l4_cb;
 
 // Pull the led0 specification from the devicetree overlay
 const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
@@ -43,6 +44,9 @@ static void l4_event_handler(struct net_mgmt_event_callback* cb, uint64_t event,
         case NET_EVENT_L4_DISCONNECTED:
             LOG_INF("Network L4 Disconnected!");
             k_sem_give(&network_disconnected);
+            break;
+        case NET_EVENT_IPV4_ADDR_ADD:
+            LOG_INF("Got an IP");
             break;
         default:
             break;
@@ -69,8 +73,12 @@ int init(void) {
 
     // Init network
     LOG_INF("Initialzing network");
-    struct net_mgmt_event_callback l4_cb;
     struct net_if* iface = net_if_get_default();
+    if (iface == NULL) {
+        LOG_ERR("No default network interface found");
+        return -ENODEV;
+    }
+
     net_mgmt_init_event_callback(&l4_cb, l4_event_handler,
                                  NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED);
     net_mgmt_add_event_callback(&l4_cb);
@@ -85,9 +93,11 @@ int init(void) {
         return -ENOTSUP;
     }
 
-    // Actually attempt to connect (non-blocking)
+    // Actually attempt to connect (non-blocking). conn_mgr auto-connects
+    // bound ifaces when they come up, so this may race with it; -EALREADY
+    // just means a connection attempt is already in flight.
     err = conn_mgr_if_connect(iface);
-    if (err != 0) return err;
+    if (err != 0 && err != -EALREADY) return err;
 
     // Wait until we actually connect
     err = k_sem_take(&network_connected, K_MSEC(NETWORK_TIMEOUT_VAL));
@@ -106,8 +116,12 @@ int init(void) {
 
     // Init time
     LOG_INF("Initializing system time");
-    time_sync_now();
-    LOG_INF("Done Initializing system time");
+    err = time_sync_now();
+    if (err == 0) {
+        LOG_INF("Done initializing system time");
+    } else {
+        LOG_WRN("Continuing without synchronized system time");
+    }
 
     // Done!
     LOG_INF("All initialization finished!");

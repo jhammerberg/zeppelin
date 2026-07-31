@@ -3,6 +3,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/sntp.h>
+#include <zephyr/net/socket.h>
 #include <zephyr/sys/clock.h>
 
 LOG_MODULE_REGISTER(time_sync, LOG_LEVEL_INF);
@@ -12,6 +13,12 @@ LOG_MODULE_REGISTER(time_sync, LOG_LEVEL_INF);
 
 // Timeout for a single SNTP query, in milliseconds.
 #define TIME_SYNC_QUERY_TIMEOUT_MS 4000
+
+// Right after L4 connect, DNS servers (from DHCP or router advertisements)
+// may not be installed yet and NTP pool servers can time out, so retry a few
+// times before giving up.
+#define TIME_SYNC_ATTEMPTS 3
+#define TIME_SYNC_RETRY_DELAY_MS 2000
 
 // Interval between periodic re-syncs performed by the sync thread.
 #define TIME_SYNC_INTERVAL_MS (60 * 60 * 1000)  // 1 hour
@@ -23,13 +30,46 @@ LOG_MODULE_REGISTER(time_sync, LOG_LEVEL_INF);
 static K_THREAD_STACK_DEFINE(time_sync_stack, TIME_SYNC_STACK_SIZE);
 static struct k_thread time_sync_thread;
 
+// Resolve the time server pinned to IPv4 and run one SNTP query against it.
+//
+// sntp_simple() resolves with AF_UNSPEC and can end up preferring an IPv6
+// (AAAA) result. On networks with only link-local/ULA IPv6 (no global IPv6
+// route) the query then fails at the UDP send. NTP pool servers are always
+// IPv4-reachable, so ask for A records explicitly.
+static int sntp_query_ipv4(struct sntp_time* sntp_time) {
+    struct zsock_addrinfo hints = {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_DGRAM,
+    };
+    struct zsock_addrinfo* addr = NULL;
+
+    int ret = zsock_getaddrinfo(TIME_SYNC_SERVER, "123", &hints, &addr);
+    if (ret != 0) {
+        return ret < 0 ? ret : -ret;
+    }
+
+    ret = sntp_simple_addr(addr->ai_addr, addr->ai_addrlen, TIME_SYNC_QUERY_TIMEOUT_MS,
+                           sntp_time);
+    zsock_freeaddrinfo(addr);
+    return ret;
+}
+
 int time_sync_now(void) {
     struct sntp_time sntp_time;
+    int ret;
 
-    int ret = sntp_simple(TIME_SYNC_SERVER, TIME_SYNC_QUERY_TIMEOUT_MS, &sntp_time);
-    if (ret < 0) {
-        LOG_ERR("Failed to query time server \"%s\": %d", TIME_SYNC_SERVER, ret);
-        return ret;
+    for (int attempt = 1;; attempt++) {
+        ret = sntp_query_ipv4(&sntp_time);
+        if (ret == 0) break;
+
+        if (attempt >= TIME_SYNC_ATTEMPTS) {
+            LOG_ERR("Failed to query time server \"%s\": %d (%d attempts)",
+                    TIME_SYNC_SERVER, ret, attempt);
+            return ret;
+        }
+
+        LOG_WRN("Time server query failed (%d), retrying...", ret);
+        k_msleep(TIME_SYNC_RETRY_DELAY_MS);
     }
 
     struct timespec tspec = {
