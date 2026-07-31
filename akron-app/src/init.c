@@ -12,8 +12,8 @@
 #include <zephyr/net/net_event.h>
 #include <zephyr/net/net_if.h>
 
-#define NETWORK_TIMEOUT_VAL \
-    30000  // Network timeout in milliseconds, for no timeout do K_FOREVER
+// Network timeout in milliseconds, for no timeout do K_FOREVER
+#define NETWORK_TIMEOUT_VAL 30000
 
 LOG_MODULE_REGISTER(init, LOG_LEVEL_INF);
 
@@ -83,21 +83,15 @@ int init(void) {
                                  NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED);
     net_mgmt_add_event_callback(&l4_cb);
 
-    // The default interface must be bound to a conn_mgr connectivity backend.
-    // On ESP32 this is the Wi-Fi driver's binding; on native_sim it is the
-    // NSOS connectivity simulation (CONFIG_NET_NATIVE_OFFLOADED_SOCKETS_
-    // CONNECTIVITY_SIM). Both drive conn_mgr_if_connect() and the L4 events
-    // identically, so the code path below is the same for every board.
-    if (!conn_mgr_if_is_bound(iface)) {
-        LOG_ERR("Default interface is not bound to a connectivity implementation!");
-        return -ENOTSUP;
+    // Check if the network interface even needs to be bound for something like WiFi vs
+    // Ethernet
+    if (conn_mgr_if_is_bound(iface)) {
+        // Attempt to connect (non-blocking)
+        // This is generic but will go to a connection manager
+        // implementation depending on the target's available interfaces
+        err = conn_mgr_if_connect(iface);
+        if (err != 0 && err != -EALREADY) return err;
     }
-
-    // Actually attempt to connect (non-blocking). conn_mgr auto-connects
-    // bound ifaces when they come up, so this may race with it; -EALREADY
-    // just means a connection attempt is already in flight.
-    err = conn_mgr_if_connect(iface);
-    if (err != 0 && err != -EALREADY) return err;
 
     // Wait until we actually connect
     err = k_sem_take(&network_connected, K_MSEC(NETWORK_TIMEOUT_VAL));
@@ -116,8 +110,7 @@ int init(void) {
 
     // Init time
     LOG_INF("Initializing system time");
-    err = time_sync_now();
-    if (err == 0) {
+    if (!time_sync_now()) {
         LOG_INF("Done initializing system time");
     } else {
         LOG_WRN("Continuing without synchronized system time");

@@ -31,11 +31,6 @@ static K_THREAD_STACK_DEFINE(time_sync_stack, TIME_SYNC_STACK_SIZE);
 static struct k_thread time_sync_thread;
 
 // Resolve the time server pinned to IPv4 and run one SNTP query against it.
-//
-// sntp_simple() resolves with AF_UNSPEC and can end up preferring an IPv6
-// (AAAA) result. On networks with only link-local/ULA IPv6 (no global IPv6
-// route) the query then fails at the UDP send. NTP pool servers are always
-// IPv4-reachable, so ask for A records explicitly.
 static int sntp_query_ipv4(struct sntp_time* sntp_time) {
     struct zsock_addrinfo hints = {
         .ai_family = AF_INET,

@@ -1,13 +1,12 @@
 /*
  * Application-defined connectivity backend for the generic WIFI_MGMT
  * connection manager binding.
- *
- * As of Zephyr v4.3, CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT only
- * declares the CONNECTIVITY_WIFI_MGMT implementation (extern) and binds WiFi
- * ifaces to it (see drivers/wifi/.../CONNECTIVITY_WIFI_MGMT_BIND). The only
- * Kconfig choice, CONNECTIVITY_WIFI_MGMT_APPLICATION, requires the application
- * to *define* that implementation. This file provides that definition.
  */
+
+#include <zephyr/kernel.h>
+
+// Don't include for targets without WiFi
+#if defined(CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT)
 
 #include <zephyr/logging/log.h>
 #include <zephyr/net/conn_mgr/connectivity_wifi_mgmt.h>
@@ -18,14 +17,14 @@
 
 LOG_MODULE_REGISTER(conn_mgr_wifi, LOG_LEVEL_INF);
 
-/* Start association. Must be non-blocking: net_mgmt requests to the WiFi L2
- * kick off the connection and the driver raises WiFi/L4 events on completion.
- */
+// Start association. Must be non-blocking: net_mgmt requests to the WiFi L2
+// kick off the connection and the driver raises WiFi/L4 events on completion.
 static int wifi_mgmt_connect(struct conn_mgr_conn_binding* const binding) {
     struct net_if* iface = binding->iface;
 
 #if defined(CONFIG_WIFI_CREDENTIALS_CONNECT_STORED)
-    /* Connect using credentials stored via the wifi_credentials library. */
+    // Connect using credentials stored via the wifi_credentials library
+    // Possible future task: allow multiple connection options
     int ret = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
 
     if (ret) {
@@ -41,7 +40,7 @@ static int wifi_mgmt_connect(struct conn_mgr_conn_binding* const binding) {
 #endif
 }
 
-/* Tear down the association / cancel any in-progress connection attempt. */
+// Tear down the association / cancel any in-progress connection attempt
 static int wifi_mgmt_disconnect(struct conn_mgr_conn_binding* const binding) {
     struct net_if* iface = binding->iface;
     int ret = net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
@@ -52,7 +51,7 @@ static int wifi_mgmt_disconnect(struct conn_mgr_conn_binding* const binding) {
     return ret;
 }
 
-/* Per-binding init hook. Nothing WiFi-specific to set up here. */
+// WiFi init - we don't really have to do anything here at the moment
 static void wifi_mgmt_init(struct conn_mgr_conn_binding* const binding) {
     ARG_UNUSED(binding);
 }
@@ -64,3 +63,5 @@ static struct conn_mgr_conn_api conn_api = {
 };
 
 CONN_MGR_CONN_DEFINE(CONNECTIVITY_WIFI_MGMT, &conn_api);
+
+#endif /* CONFIG_NET_CONNECTION_MANAGER_CONNECTIVITY_WIFI_MGMT */
