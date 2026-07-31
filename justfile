@@ -12,11 +12,13 @@ west *ARGS:
 
 # clang-format check of all source files (dryrun)
 check:
+    git add .
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format --dry-run --Werror -style=file || true
     # use clang-format from uv venv and finds files using git which should be guarenteed to exist
 
 # clang-format all source files
 format:
+    git add .
     git ls-files "*.cpp" "*.h" "*.hpp" "*.cc" "*.c" | xargs uv run clang-format -i -style=file || true
 
 # First time setup
@@ -24,7 +26,7 @@ setup:
     @echo "{{YELLOW}}{{BOLD}}Running first time setup...{{NORMAL}}"
     # NOTE: Python 3.13+ will break setup because of changes to filesystem paths
     uv venv --python 3.12 --clear
-    uv pip install pip west
+    uv pip install pip west jsonschema
     just update
 
 # Auto-update west and Zephyr dependencies
@@ -49,8 +51,14 @@ console baud=default_baud:
     uv run west espressif monitor
     # TODO: make into generic serial monitor with something like minicom
 
+# Run (and build if needed) the native_sim build
+[unix]
+run-sim: (build "akron-app" "true")
+    @echo "{{BLUE}}Running native_sim...{{NORMAL}}"
+    ./build/zephyr/zephyr.exe
+
 # Build a target (pass --sim to build for native_sim)
 [arg("sim", long, value="true")]
 build target sim="false":
     @echo "{{BLUE}}Building{{NORMAL}} {{target}}..."
-    uv run west build {{target}} -p auto {{ if sim == "true" { "-b native_sim" } else { "" } }}
+    uv run west build {{target}} -p auto -b {{ if sim == "true" { "native_sim" } else { "esp32_devkitc/esp32/procpu" } }}

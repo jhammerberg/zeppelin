@@ -6,3 +6,4 @@ CompileFlags:
     - -fno-printf-return-value
     - -fno-reorder-functions
     - -fstrict-volatile-bitfields
+    - -fno-freestanding

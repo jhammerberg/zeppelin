@@ -7,5 +7,10 @@
         ]
       }
     }
+  },
+  "file_types": {
+    "Kconfig": [
+      "*.conf",
+    ],
   }
 }
