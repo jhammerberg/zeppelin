@@ -1,5 +1,6 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
+#include <zephyr/net/hostname.h>
 
 #include "init.h"
 
@@ -11,6 +12,9 @@ int main(void) {
         printk("Init failed :(");
         return ret;
     }
+
+    const char *name = net_hostname_get();
+    printk("Current device hostname: %s\n", name);
 
     while (1) {
         gpio_pin_toggle_dt(&led);  // led is an extern
