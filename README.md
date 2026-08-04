@@ -44,7 +44,7 @@ just console # command alias is work in progress
 ```
 ### Build, Run, Test for Simulation (POSIX only)
 > [!IMPORTANT]
-> This can only work on a POSIX system (Linux or MacOS), if using Windows you must use WSL!
+> This can only work on a POSIX system (Linux), if using Windows you must use WSL, or MacOS must use a VM.
 1. Build app, but with `--sim` flag
 ```bash
 just build akron-app --sim
