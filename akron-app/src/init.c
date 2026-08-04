@@ -53,9 +53,8 @@ static void l4_event_handler(struct net_mgmt_event_callback* cb, uint64_t event,
     }
 }
 
-// Initialize all GPIO, start networking, sync system time, etc
-int init(void) {
-    // Init GPIO
+// Init GPIO
+int gpio_init(void) {
     LOG_INF("Initializing GPIO");
     if (!gpio_is_ready_dt(&led) || !gpio_is_ready_dt(&button)) return -1;
 
@@ -70,10 +69,14 @@ int init(void) {
     gpio_init_callback(&button_cb_data, button_pressed_handler, BIT(button.pin));
     gpio_add_callback_dt(&button, &button_cb_data);
     LOG_INF("Done initializng GPIO");
+}
 
-    // Init network
+int net_init(void) {
     LOG_INF("Initialzing network");
+
+    int err;
     struct net_if* iface = net_if_get_default();
+
     if (iface == NULL) {
         LOG_ERR("No default network interface found");
         return -ENODEV;
@@ -107,14 +110,33 @@ int init(void) {
         LOG_ERR("dafuq?");
         return err;
     }
+}
 
-    // Init time
+int init_time(void) {
     LOG_INF("Initializing system time");
     if (!time_sync_now()) {
         LOG_INF("Done initializing system time");
     } else {
         LOG_WRN("Continuing without synchronized system time");
     }
+    return 0;
+}
+
+// Initialize all GPIO, start networking, sync system time, etc
+int init(void) {
+    int err;
+
+    // Init GPIO
+    err = gpio_init();
+    if (err != 0) return err;
+
+    // Init network
+    err = net_init();
+    if (err != 0) return err;
+
+    // Init time
+    err = init_time();
+    if (err != 0) return err;
 
     // Done!
     LOG_INF("All initialization finished!");
