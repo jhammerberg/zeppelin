@@ -69,6 +69,7 @@ int gpio_init(void) {
     gpio_init_callback(&button_cb_data, button_pressed_handler, BIT(button.pin));
     gpio_add_callback_dt(&button, &button_cb_data);
     LOG_INF("Done initializng GPIO");
+    return 0;
 }
 
 int net_init(void) {
@@ -110,15 +111,6 @@ int net_init(void) {
         LOG_ERR("dafuq?");
         return err;
     }
-}
-
-int init_time(void) {
-    LOG_INF("Initializing system time");
-    if (!time_sync_now()) {
-        LOG_INF("Done initializing system time");
-    } else {
-        LOG_WRN("Continuing without synchronized system time");
-    }
     return 0;
 }
 
@@ -135,8 +127,12 @@ int init(void) {
     if (err != 0) return err;
 
     // Init time
-    err = init_time();
-    if (err != 0) return err;
+    LOG_INF("Initializing system time");
+    if (!time_sync_now()) {
+        LOG_INF("Done initializing system time");
+    } else {
+        LOG_WRN("Continuing without synchronized system time");
+    }
 
     // Done!
     LOG_INF("All initialization finished!");

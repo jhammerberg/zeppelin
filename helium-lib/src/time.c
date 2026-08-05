@@ -17,7 +17,7 @@ LOG_MODULE_REGISTER(time_sync, LOG_LEVEL_INF);
 // Right after L4 connect, DNS servers (from DHCP or router advertisements)
 // may not be installed yet and NTP pool servers can time out, so retry a few
 // times before giving up.
-#define TIME_SYNC_ATTEMPTS 3
+#define TIME_SYNC_ATTEMPTS 10
 #define TIME_SYNC_RETRY_DELAY_MS 2000
 
 // Interval between periodic re-syncs performed by the sync thread.
