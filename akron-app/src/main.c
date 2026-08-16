@@ -13,7 +13,7 @@ int main(void) {
         return ret;
     }
 
-    const char *name = net_hostname_get();
+    const char* name = net_hostname_get();
     printk("Current device hostname: %s\n", name);
 
     while (1) {
