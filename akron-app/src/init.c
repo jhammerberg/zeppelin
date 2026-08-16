@@ -114,6 +114,16 @@ int net_init(void) {
     return 0;
 }
 
+int time_init(void) {
+    LOG_INF("Initializing system time");
+    if (!time_sync_now()) {
+        LOG_INF("Done initializing system time");
+    } else {
+        LOG_WRN("Continuing without synchronized system time");
+    }
+    return 0;
+}
+
 // Initialize all GPIO, start networking, sync system time, etc
 int init(void) {
     int err;
@@ -127,12 +137,8 @@ int init(void) {
     if (err != 0) return err;
 
     // Init time
-    LOG_INF("Initializing system time");
-    if (!time_sync_now()) {
-        LOG_INF("Done initializing system time");
-    } else {
-        LOG_WRN("Continuing without synchronized system time");
-    }
+    err = time_init();
+    if (err != 0) return err;
 
     // Done!
     LOG_INF("All initialization finished!");
